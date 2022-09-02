@@ -127,12 +127,9 @@ tf_validate() {
   echo "      At environment: ${tf_component}/${tf_env} "
   echo "      Using policy from: ${policy_file_path} "
   echo "*****************************************************"
-  if ! command -v terraform-validator &> /dev/null; then
-    echo "terraform-validator not found!  Check path or visit"
-    echo "https://github.com/forseti-security/policy-library/blob/master/docs/user_guide.md#how-to-use-terraform-validator"
-  elif [ -z "$policy_file_path" ]; then
+  if [ -z "$policy_file_path" ]; then
     echo "no policy repo found! Check the argument provided for policysource to this script."
-    echo "https://github.com/forseti-security/policy-library/blob/master/docs/user_guide.md#how-to-use-terraform-validator"
+    echo "https://github.com/GoogleCloudPlatform/terraform-validator/blob/main/docs/policy_library.md"
   else
     if [ -d "$path" ]; then
       cd "$path" || exit
@@ -141,9 +138,12 @@ tf_validate() {
         # Check if $policy_file_path is empty so we clone the policies repo only once
         if [ -z "$(ls -A "${policy_file_path}" 2> /dev/null)" ]; then
           gcloud source repos clone gcp-policies "${policy_file_path}" --project="${project_id}" || exit 34
+          pushd .
+          cd "${policy_file_path}" && git checkout main || exit 35
+          popd
         fi
       fi
-      terraform-validator validate "${tf_env}.json" --policy-path="${policy_file_path}" --project="${project_id}" || exit 33
+      gcloud beta terraform vet "${tf_env}.json" --policy-library="${policy_file_path}" --project="${project_id}" || exit 33
       cd "$base_dir" || exit
     else
       echo "ERROR:  ${path} does not exist"

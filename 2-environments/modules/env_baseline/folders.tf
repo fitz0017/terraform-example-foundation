@@ -15,19 +15,16 @@
  */
 
 /******************************************
-  Folder lookups
-*****************************************/
-
-data "google_active_folder" "common" {
-  display_name = "${var.folder_prefix}-common"
-  parent       = local.parent
-}
-
-/******************************************
   Environment Folder
 *****************************************/
 
 resource "google_folder" "env" {
-  display_name = "${var.folder_prefix}-${var.env}"
+  display_name = "${local.folder_prefix}-${var.env}"
   parent       = local.parent
+}
+
+resource "time_sleep" "wait_30_seconds" {
+  depends_on = [google_folder.env]
+
+  destroy_duration = "30s"
 }

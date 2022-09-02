@@ -2,14 +2,12 @@
 
 This repo is part of a multi-part guide that shows how to configure and deploy
 the example.com reference architecture described in
-[Google Cloud security foundations guide](https://services.google.com/fh/files/misc/google-cloud-security-foundations-guide.pdf)
-(PDF). The following table lists the parts of the guide.
+[Google Cloud security foundations guide](https://cloud.google.com/architecture/security-foundations). The following table lists the parts of the guide.
 
 <table>
 <tbody>
 <tr>
-<td><a
-href="../0-bootstrap">0-bootstrap</a></td>
+<td><a href="../0-bootstrap">0-bootstrap</a></td>
 <td>Bootstraps a Google Cloud organization, creating all the required resources
 and permissions to start using the Cloud Foundation Toolkit (CFT). This
 step also configures a CI/CD pipeline for foundations code in subsequent
@@ -22,28 +20,31 @@ organization-level logging, and sets baseline security settings through
 organizational policy.</td>
 </tr>
 <tr>
-<td><a
-href="../2-environments"><span style="white-space: nowrap;">2-environments</span></a></td>
+<td><a href="../2-environments"><span style="white-space: nowrap;">2-environments</span></a></td>
 <td>Sets up development, non-production, and production environments within the
 Google Cloud organization that you've created.</td>
 </tr>
 <tr>
-<td><a
-href="../3-networks">3-networks</a></td>
+<td><a href="../3-networks-dual-svpc">3-networks-dual-svpc</a></td>
 <td>Sets up base and restricted shared VPCs with default DNS, NAT (optional),
 Private Service networking, VPC service controls, on-premises Dedicated
 Interconnect, and baseline firewall rules for each environment. It also sets
 up the global DNS hub.</td>
 </tr>
 <tr>
-<td><a
-href="../4-projects">4-projects</a></td>
+<td><a href="../3-networks-hub-and-spoke">3-networks-hub-and-spoke</a></td>
+<td>Sets up base and restricted shared VPCs with all the default configuration
+found on step 3-networks-dual-svpc, but here the architecture will be based on the
+Hub and Spoke network model. It also sets up the global DNS hub</td>
+</tr>
+</tr>
+<tr>
+<td><a href="../4-projects">4-projects</a></td>
 <td>Sets up a folder structure, projects, and application infrastructure pipeline for applications,
  which are connected as service projects to the shared VPC created in the previous stage.</td>
 </tr>
 <tr>
-<td><a
-href="../5-app-infra">5-app-infra</a></td>
+<td><a href="../5-app-infra">5-app-infra</a></td>
 <td>Deploy a simple <a href="https://cloud.google.com/compute/">Compute Engine</a> instance in one of the business unit projects using the infra pipeline set up in 4-projects.</td>
 </tr>
 </tbody>
@@ -62,9 +63,9 @@ The purpose of this step is to set up top-level shared folders, monitoring and n
 2. Cloud Identity / Google Workspace group for security admins.
 3. Membership in the security admins group for the user running Terraform.
 4. Security Command Center notifications require that you choose a Security Command Center tier and create and grant permissions for the Security Command Center service account as outlined in [Setting up Security Command Center](https://cloud.google.com/security-command-center/docs/quickstart-security-command-center)
+5. Ensure that you have requested a sufficient project quota, as the Terraform scripts will create multiple projects from this point onwards. For more information, please [see the FAQ](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/docs/FAQ.md#why-am-i-encountering-a-low-quota-with-projects-created-via-terraform-example-foundation).
 
-**Note:** Make sure that you use the same version of Terraform throughout this
-series, otherwise you might experience Terraform state snapshot lock errors.
+**Note:** Make sure that you use version 1.0.0 of Terraform throughout this series, otherwise you might experience Terraform state snapshot lock errors.
 
 ### Troubleshooting
 
@@ -77,7 +78,7 @@ Enabling Data Access logs might result in your project being charged for the add
 For details on costs you might incur, go to [Pricing](https://cloud.google.com/stackdriver/pricing).
 You can choose not to enable the Data Access logs by setting variable `data_access_logs_enabled` to false.
 
-**Note:** This module creates a sink to export all logs to Google Storage. It also creates sinks to export a subset of security related logs
+**Note:** This module creates a sink to export all logs to Google Storage. It also creates sinks to export a subset of security-related logs
 to Bigquery and Pub/Sub. This will result in additional charges for those copies of logs.
 You can change the filters & sinks by modifying the configuration in `envs/shared/log_sinks.tf`.
 
@@ -87,7 +88,10 @@ You can change the filters & sinks by modifying the configuration in `envs/share
 OS Login has some [limitations](https://cloud.google.com/compute/docs/instances/managing-instance-access#limitations).
 If those limitations do not apply to your workload/environment, you can choose to enable the OS Login policy by setting variable `enable_os_login_policy` to `true`.
 
-**Note:** You need to set variable `enable_hub_and_spoke` to `true` to be able to used the **Hub-and-Spoke** architecture detailed in the **Networking** section of the [google cloud security foundations guide](https://services.google.com/fh/files/misc/google-cloud-security-foundations-guide.pdf).
+**Note:** You need to set variable `enable_hub_and_spoke` to `true` to be able to use the **Hub-and-Spoke** architecture detailed in the **Networking** section of the [Google Cloud security foundations guide](https://cloud.google.com/architecture/security-foundations/networking#hub-and-spoke).
+
+**Note:** If you are using MacOS, replace `cp -RT` with `cp -R` in the relevant
+commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
 
 **Note:** This module creates a Security Command Center Notification.
 The notification name must be unique in the organization.
@@ -106,9 +110,12 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to see 
    ```
    gcloud source repos clone gcp-policies --project=YOUR_CLOUD_BUILD_PROJECT_ID
    ```
-1. Navigate into the repo.
+1. Navigate into the repo. All subsequent steps assume you are running them
+   from the gcp-policies directory. If you run them from another directory,
+   adjust your copy paths accordingly.
    ```
    cd gcp-policies
+   git checkout -b main
    ```
 1. Copy contents of policy-library to new repo.
    ```
@@ -120,9 +127,9 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to see 
    git add .
    git commit -m 'Your message'
    ```
-1. Push your master branch to the new repo.
+1. Push your main branch to the new repo.
    ```
-   git push --set-upstream origin master
+   git push --set-upstream origin main
    ```
 1. Navigate out of the repo.
    ```
@@ -131,13 +138,18 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to see 
 1. Clone the repo.
    ```
    gcloud source repos clone gcp-org --project=YOUR_CLOUD_BUILD_PROJECT_ID
+
    ```
-1. Navigate into the repo and change to a non-production branch.
+   The message `warning: You appear to have cloned an empty repository.` is
+   normal and can be ignored.
+1. Navigate into the repo and change to a non-production branch. All subsequent
+   steps assume you are running them from the gcp-environments directory. If
+   you run them from another directory, adjust your copy paths accordingly.
    ```
    cd gcp-org
    git checkout -b plan
    ```
-1. Copy contents of foundation to new repo (terraform variables will updated in a future step).
+1. Copy contents of foundation to new repo (terraform variables will be updated in a future step).
    ```
    cp -RT ../terraform-example-foundation/1-org/ .
    ```
@@ -164,12 +176,15 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to see 
    git add .
    git commit -m 'Your message'
    ```
-1. Push your plan branch to trigger a plan. For this command, the branch `plan` is not a special one. Any branch which name is different from `development`, `non-production` or `production` will trigger a Terraform plan.
+1. Push your plan branch to trigger a plan for all environments. Because the
+   _plan_ branch is not a [named environment branch](./docs/FAQ.md), pushing your _plan_
+   branch triggers _terraform plan_ but not _terraform apply_.
    ```
    git push --set-upstream origin plan
    ```
 1. Review the plan output in your Cloud Build project. https://console.cloud.google.com/cloud-build/builds?project=YOUR_CLOUD_BUILD_PROJECT_ID
-1. Merge changes to production branch.
+1. Merge changes to production branch.  Because the _production_ branch is a [named environment branch](./docs/FAQ.md#what-is-a-named-branch),
+   pushing to this branch triggers both _terraform plan_ and _terraform apply_.
    ```
    git checkout -b production
    git push origin production
@@ -180,7 +195,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to see 
 **Troubleshooting:**
 If you received a `PERMISSION_DENIED` error running the `gcloud access-context-manager` or the `gcloud scc notifications` commands you can append
 ```
---impersonate-service-account=org-terraform@<SEED_PROJECT_ID>.iam.gserviceaccount.com
+--impersonate-service-account=terraform-org-sa@<SEED_PROJECT_ID>.iam.gserviceaccount.com
 ```
 to run the command as the Terraform service account.
 
@@ -190,7 +205,9 @@ to run the command as the Terraform service account.
    ```
    git clone <YOUR_NEW_REPO-1-org>
    ```
-1. Navigate into the repo and change to a non-production branch.
+1. Navigate into the repo and change to a non-production branch. All subsequent
+   steps assume you are running them from the gcp-environments directory. If
+   you run them from another directory, adjust your copy paths accordingly.
    ```
    cd YOUR_NEW_REPO_CLONE-1-org
    git checkout -b plan
@@ -232,18 +249,18 @@ to run the command as the Terraform service account.
    git add .
    git commit -m 'Your message'
    ```
-1. Push your plan branch. The branch `plan` is not a special one. Any branch which name is different from `development`, `non-production` or `production` will trigger a Terraform plan.
-    - Assuming you configured an automatic trigger in your Jenkins Master (see [Jenkins sub-module README](../0-bootstrap/modules/jenkins-agent)), this will trigger a plan. You can also trigger a Jenkins job manually. Given the many options to do this in Jenkins, it is out of the scope of this document see [Jenkins website](http://www.jenkins.io) for more details.
+1. Push your plan branch.
+    - Assuming you configured an automatic trigger in your Jenkins Controller (see [Jenkins sub-module README](../0-bootstrap/modules/jenkins-agent)), this will trigger a plan. You can also trigger a Jenkins job manually. Given the many options to do this in Jenkins, it is out of the scope of this document see [Jenkins website](http://www.jenkins.io) for more details.
    ```
    git push --set-upstream origin plan
    ```
-1. Review the plan output in your Master's web UI.
+1. Review the plan output in your Controller's web UI.
 1. Merge changes to production branch.
    ```
    git checkout -b production
    git push origin production
    ```
-1. Review the apply output in your Master's web UI. (you might want to use the option to "Scan Multibranch Pipeline Now" in your Jenkins Master UI).
+1. Review the apply output in your Controller's web UI. (you might want to use the option to "Scan Multibranch Pipeline Now" in your Jenkins Controller UI).
 
 ### Running Terraform locally
 
@@ -252,7 +269,7 @@ to run the command as the Terraform service account.
 1. Run `chmod 755 ./tf-wrapper.sh`
 1. Change into 1-org/envs/shared/ folder.
 1. Rename `terraform.example.tfvars` to `terraform.tfvars` and update the file with values from your environment and bootstrap.
-1. Obtain your bucket name by running the following command in the 0-bootstap folder.
+1. Obtain your bucket name by running the following command in the 0-bootstrap folder.
    ```
    terraform output gcs_bucket_tfstate
    ```
@@ -262,13 +279,13 @@ to run the command as the Terraform service account.
    ```
 
 We will now deploy our environment (production) using this script.
-When using Cloud Build or Jenkins as your CI/CD tool each environment corresponds to a branch is the repository for 1-org step and only the corresponding environment is applied.
+When using Cloud Build or Jenkins as your CI/CD tool each environment corresponding to a branch is the repository for 1-org step and only the corresponding environment is applied.
 
-To use the `validate` option of the `tf-wrapper.sh` script, please follow the [instructions](https://github.com/forseti-security/policy-library/blob/master/docs/user_guide.md#install-terraform-validator) in the **Install Terraform Validator** section and install version `2021-03-22` in your system. You will also need to rename the binary from `terraform-validator-<your-platform>` to `terraform-validator` and the `terraform-validator` binary must be in your `PATH`.
+To use the `validate` option of the `tf-wrapper.sh` script, please follow the [instructions](https://cloud.google.com/docs/terraform/policy-validation/validate-policies#install) to install the terraform-tools component.
 
 1. Run `./tf-wrapper.sh init production`.
-1. Run `./tf-wrapper.sh plan production` and review output.
-1. Run `./tf-wrapper.sh validate production $(pwd)/../policy-library <YOUR_CLOUD_BUILD_PROJECT_ID>` and check for violations.
-1. Run `./tf-wrapper.sh apply production`.
+2. Run `./tf-wrapper.sh plan production` and review output.
+3. Run `./tf-wrapper.sh validate production $(pwd)/../policy-library <YOUR_CLOUD_BUILD_PROJECT_ID>` and check for violations.
+4. Run `./tf-wrapper.sh apply production`.
 
 If you received any errors or made any changes to the Terraform config or `terraform.tfvars` you must re-run `./tf-wrapper.sh plan production` before run `./tf-wrapper.sh apply production`.

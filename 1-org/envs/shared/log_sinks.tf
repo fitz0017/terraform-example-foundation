@@ -15,8 +15,8 @@
  */
 
 locals {
-  parent_resource_id   = var.parent_folder != "" ? var.parent_folder : var.org_id
-  parent_resource_type = var.parent_folder != "" ? "folder" : "organization"
+  parent_resource_id   = local.parent_folder != "" ? local.parent_folder : local.org_id
+  parent_resource_type = local.parent_folder != "" ? "folder" : "organization"
   main_logs_filter     = <<EOF
     logName: /logs/cloudaudit.googleapis.com%2Factivity OR
     logName: /logs/cloudaudit.googleapis.com%2Fsystem_event OR
@@ -40,7 +40,7 @@ resource "random_string" "suffix" {
 
 module "log_export_to_biqquery" {
   source                 = "terraform-google-modules/log-export/google"
-  version                = "~> 5.1.0"
+  version                = "~> 7.3.0"
   destination_uri        = module.bigquery_destination.destination_uri
   filter                 = local.main_logs_filter
   log_sink_name          = "sk-c-logging-bq"
@@ -55,7 +55,7 @@ module "log_export_to_biqquery" {
 
 module "bigquery_destination" {
   source                     = "terraform-google-modules/log-export/google//modules/bigquery"
-  version                    = "~> 5.1.0"
+  version                    = "~> 7.3.0"
   project_id                 = module.org_audit_logs.project_id
   dataset_name               = "audit_logs"
   log_sink_writer_identity   = module.log_export_to_biqquery.writer_identity
@@ -69,7 +69,7 @@ module "bigquery_destination" {
 
 module "log_export_to_storage" {
   source                 = "terraform-google-modules/log-export/google"
-  version                = "~> 5.1.0"
+  version                = "~> 7.3.0"
   destination_uri        = module.storage_destination.destination_uri
   filter                 = local.all_logs_filter
   log_sink_name          = "sk-c-logging-bkt"
@@ -81,7 +81,7 @@ module "log_export_to_storage" {
 
 module "storage_destination" {
   source                      = "terraform-google-modules/log-export/google//modules/storage"
-  version                     = "~> 5.1.0"
+  version                     = "~> 7.3.0"
   project_id                  = module.org_audit_logs.project_id
   storage_bucket_name         = "bkt-${module.org_audit_logs.project_id}-org-logs-${random_string.suffix.result}"
   log_sink_writer_identity    = module.log_export_to_storage.writer_identity
@@ -98,7 +98,7 @@ module "storage_destination" {
 
 module "log_export_to_pubsub" {
   source                 = "terraform-google-modules/log-export/google"
-  version                = "~> 5.1.0"
+  version                = "~> 7.3.0"
   destination_uri        = module.pubsub_destination.destination_uri
   filter                 = local.main_logs_filter
   log_sink_name          = "sk-c-logging-pub"
@@ -110,7 +110,7 @@ module "log_export_to_pubsub" {
 
 module "pubsub_destination" {
   source                   = "terraform-google-modules/log-export/google//modules/pubsub"
-  version                  = "~> 5.1.0"
+  version                  = "~> 7.3.0"
   project_id               = module.org_audit_logs.project_id
   topic_name               = "tp-org-logs-${random_string.suffix.result}"
   log_sink_writer_identity = module.log_export_to_pubsub.writer_identity
@@ -125,5 +125,5 @@ resource "google_bigquery_dataset" "billing_dataset" {
   dataset_id    = "billing_data"
   project       = module.org_billing_logs.project_id
   friendly_name = "GCP Billing Data"
-  location      = var.default_region
+  location      = local.default_region
 }

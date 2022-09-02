@@ -29,11 +29,6 @@ variable "billing_account" {
   type        = string
 }
 
-variable "impersonate_service_account" {
-  description = "Service account email of the account to impersonate to run Terraform"
-  type        = string
-}
-
 variable "project_suffix" {
   description = "The name of the GCP project. Max 16 characters with 3 character business unit code."
   type        = string
@@ -81,6 +76,18 @@ variable "vpc_type" {
   description = "The type of VPC to attach the project to. Possible options are base or restricted."
   type        = string
   default     = ""
+}
+
+variable "shared_vpc_host_project_id" {
+  description = "Shared VPC host project ID"
+  type        = string
+  default     = ""
+}
+
+variable "shared_vpc_subnets" {
+  description = "List of the shared vpc subnets self links."
+  type        = list(string)
+  default     = []
 }
 
 variable "vpc_service_control_attach_enabled" {

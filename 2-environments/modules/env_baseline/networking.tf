@@ -20,14 +20,14 @@
 
 module "base_shared_vpc_host_project" {
   source                      = "terraform-google-modules/project-factory/google"
-  version                     = "~> 10.1"
-  random_project_id           = "true"
-  impersonate_service_account = var.terraform_service_account
-  name                        = format("%s-%s-shared-base", var.project_prefix, var.environment_code)
-  org_id                      = var.org_id
-  billing_account             = var.billing_account
+  version                     = "~> 13.0"
+  random_project_id           = true
+  name                        = format("%s-%s-shared-base", local.project_prefix, var.environment_code)
+  org_id                      = local.org_id
+  billing_account             = local.billing_account
   folder_id                   = google_folder.env.id
   disable_services_on_destroy = false
+  depends_on                  = [time_sleep.wait_30_seconds]
   activate_apis = [
     "compute.googleapis.com",
     "dns.googleapis.com",
@@ -53,14 +53,14 @@ module "base_shared_vpc_host_project" {
 
 module "restricted_shared_vpc_host_project" {
   source                      = "terraform-google-modules/project-factory/google"
-  version                     = "~> 10.1"
-  random_project_id           = "true"
-  impersonate_service_account = var.terraform_service_account
-  name                        = format("%s-%s-shared-restricted", var.project_prefix, var.environment_code)
-  org_id                      = var.org_id
-  billing_account             = var.billing_account
+  version                     = "~> 13.0"
+  random_project_id           = true
+  name                        = format("%s-%s-shared-restricted", local.project_prefix, var.environment_code)
+  org_id                      = local.org_id
+  billing_account             = local.billing_account
   folder_id                   = google_folder.env.id
   disable_services_on_destroy = false
+  depends_on                  = [time_sleep.wait_30_seconds]
   activate_apis = [
     "compute.googleapis.com",
     "dns.googleapis.com",

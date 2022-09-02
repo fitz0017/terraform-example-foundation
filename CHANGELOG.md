@@ -1,5 +1,40 @@
 # Changelog
 
+### [2.3.1](https://www.github.com/terraform-google-modules/terraform-example-foundation/compare/v2.3.0...v2.3.1) (2021-10-15)
+
+
+### Bug Fixes
+
+* upgrade cloud router module version ([#559](https://www.github.com/terraform-google-modules/terraform-example-foundation/issues/559)) ([b67e62a](https://www.github.com/terraform-google-modules/terraform-example-foundation/commit/b67e62adf5e7431209a02dc4b70c3d793db5c6eb))
+
+## [2.3.0](https://www.github.com/terraform-google-modules/terraform-example-foundation/compare/v2.2.0...v2.3.0) (2021-09-02)
+
+
+### Features
+
+* replace scc gcloud provisioner with native resource ([#514](https://www.github.com/terraform-google-modules/terraform-example-foundation/issues/514)) ([d2cdfb6](https://www.github.com/terraform-google-modules/terraform-example-foundation/commit/d2cdfb6855b6b26e18358a7456247e93d8861e6d))
+
+## [2.2.0](https://www.github.com/terraform-google-modules/terraform-example-foundation/compare/v2.1.1...v2.2.0) (2021-07-16)
+
+
+### Features
+
+* Add permissions for SFB recommended groups ([#446](https://www.github.com/terraform-google-modules/terraform-example-foundation/issues/446)) ([a18b203](https://www.github.com/terraform-google-modules/terraform-example-foundation/commit/a18b2036531d9529778d6a0e6b6c9583a0ec76a2))
+
+
+### Bug Fixes
+
+* added link to FAQ in 1-org ([#497](https://www.github.com/terraform-google-modules/terraform-example-foundation/issues/497)) ([a266e02](https://www.github.com/terraform-google-modules/terraform-example-foundation/commit/a266e0275604ea4aff87a64c06ed100f070db520))
+* Update project-factory module to 10.1 ([#499](https://www.github.com/terraform-google-modules/terraform-example-foundation/issues/499)) ([f46e2e8](https://www.github.com/terraform-google-modules/terraform-example-foundation/commit/f46e2e86d18b847bd08497551b58da4794137e4f))
+
+### [2.1.1](https://www.github.com/terraform-google-modules/terraform-example-foundation/compare/v2.1.0...v2.1.1) (2021-06-23)
+
+
+### Bug Fixes
+
+* add browser role to cloud build sa for provided folders ([#484](https://www.github.com/terraform-google-modules/terraform-example-foundation/issues/484)) ([b3996e2](https://www.github.com/terraform-google-modules/terraform-example-foundation/commit/b3996e22f3f9f31242a774f99aab360f8467615d))
+* upgrade terraform to 0.13.7 ([#490](https://www.github.com/terraform-google-modules/terraform-example-foundation/issues/490)) ([a9150a7](https://www.github.com/terraform-google-modules/terraform-example-foundation/commit/a9150a7356a94a39be20736513a5e87a0cdfee3b))
+
 ## [2.1.0](https://www.github.com/terraform-google-modules/terraform-example-foundation/compare/v2.0.0...v2.1.0) (2021-05-15)
 
 

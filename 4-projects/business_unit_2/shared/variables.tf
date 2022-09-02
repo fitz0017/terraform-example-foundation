@@ -20,25 +20,9 @@ variable "default_region" {
   default     = "us-central1"
 }
 
-variable "terraform_service_account" {
-  description = "Service account email of the account to impersonate to run Terraform"
+variable "impersonate_service_account" {
+  description = "Service account email of the account to impersonate to run gcloud build submit"
   type        = string
-}
-
-variable "org_id" {
-  description = "The organization id for the associated services"
-  type        = string
-}
-
-variable "billing_account" {
-  description = "The ID of the billing account to associated this project with"
-  type        = string
-}
-
-variable "parent_folder" {
-  description = "Optional - if using a folder for testing."
-  type        = string
-  default     = ""
 }
 
 variable "alert_spent_percents" {
@@ -59,14 +43,7 @@ variable "budget_amount" {
   default     = 1000
 }
 
-variable "folder_prefix" {
-  description = "Name prefix to use for folders created."
+variable "backend_bucket" {
+  description = "Backend bucket to load remote state information from previous steps."
   type        = string
-  default     = "fldr"
-}
-
-variable "project_prefix" {
-  description = "Name prefix to use for projects created."
-  type        = string
-  default     = "prj"
 }

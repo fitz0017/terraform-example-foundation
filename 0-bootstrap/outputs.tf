@@ -19,9 +19,24 @@ output "seed_project_id" {
   value       = module.seed_bootstrap.seed_project_id
 }
 
-output "terraform_service_account" {
-  description = "Email for privileged service account for Terraform."
-  value       = module.seed_bootstrap.terraform_sa_email
+output "projects_step_terraform_service_account_email" {
+  description = "Projects Step Terraform Account"
+  value       = google_service_account.terraform-env-sa["proj"].email
+}
+
+output "networks_step_terraform_service_account_email" {
+  description = "Networks Step Terraform Account"
+  value       = google_service_account.terraform-env-sa["net"].email
+}
+
+output "environment_step_terraform_service_account_email" {
+  description = "Environment Step Terraform Account"
+  value       = google_service_account.terraform-env-sa["env"].email
+}
+
+output "organization_step_terraform_service_account_email" {
+  description = "Organization Step Terraform Account"
+  value       = google_service_account.terraform-env-sa["org"].email
 }
 
 output "terraform_sa_name" {
@@ -34,38 +49,37 @@ output "gcs_bucket_tfstate" {
   value       = module.seed_bootstrap.gcs_bucket_tfstate
 }
 
+output "common_config" {
+  description = "Common configuration data to be used in other steps."
+  value = {
+    org_id                = var.org_id,
+    parent_folder         = var.parent_folder,
+    billing_account       = var.billing_account,
+    default_region        = var.default_region,
+    project_prefix        = var.project_prefix,
+    folder_prefix         = var.folder_prefix
+    parent_id             = local.parent
+    bootstrap_folder_name = google_folder.bootstrap.name
+  }
+}
+
 /* ----------------------------------------
     Specific to cloudbuild_module
    ---------------------------------------- */
 // Comment-out the cloudbuild_bootstrap module and its outputs if you want to use Jenkins instead of Cloud Build
 output "cloudbuild_project_id" {
   description = "Project where CloudBuild configuration and terraform container image will reside."
-  value       = module.cloudbuild_bootstrap.cloudbuild_project_id
+  value       = module.tf_source.cloudbuild_project_id
 }
 
 output "gcs_bucket_cloudbuild_artifacts" {
   description = "Bucket used to store Cloud/Build artifacts in CloudBuild project."
-  value       = module.cloudbuild_bootstrap.gcs_bucket_cloudbuild_artifacts
+  value       = { for key, value in module.tf_workspace : key => replace(value.artifacts_bucket, local.bucket_self_link_prefix, "") }
 }
 
 output "csr_repos" {
   description = "List of Cloud Source Repos created by the module, linked to Cloud Build triggers."
-  value       = module.cloudbuild_bootstrap.csr_repos
-}
-
-output "terraform_validator_policies_repo" {
-  description = "Cloud Source Repository created for terraform-validator policies."
-  value       = google_sourcerepo_repository.gcp_policies
-}
-
-output "kms_keyring" {
-  description = "KMS Keyring created by the module."
-  value       = module.cloudbuild_bootstrap.kms_keyring
-}
-
-output "kms_crypto_key" {
-  description = "KMS key created by the module."
-  value       = module.cloudbuild_bootstrap.kms_crypto_key
+  value       = module.tf_source.csr_repos
 }
 
 /* ----------------------------------------
@@ -101,3 +115,18 @@ output "kms_crypto_key" {
 //  description = "Bucket used to store Jenkins artifacts in Jenkins project."
 //  value       = module.jenkins_bootstrap.gcs_bucket_jenkins_artifacts
 //}
+
+
+/* ----------------------------------------
+    Specific to Google Groups creation module
+   ---------------------------------------- */
+
+output "required_groups" {
+  description = "List of Google Groups created that are required by the Example Foundation steps."
+  value       = var.groups.create_groups == true ? module.required_group : {}
+}
+
+output "optional_groups" {
+  description = "List of Google Groups created that are optional to the Example Foundation steps."
+  value       = var.groups.create_groups == true ? module.optional_group : {}
+}

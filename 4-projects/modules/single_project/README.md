@@ -16,13 +16,14 @@
 | enable\_hub\_and\_spoke | Enable Hub-and-Spoke architecture. | `bool` | `false` | no |
 | environment | The environment the single project belongs to | `string` | n/a | yes |
 | folder\_id | The folder id where project will be created | `string` | n/a | yes |
-| impersonate\_service\_account | Service account email of the account to impersonate to run Terraform | `string` | n/a | yes |
 | org\_id | The organization id for the associated services | `string` | n/a | yes |
 | primary\_contact | The primary email contact for the project | `string` | n/a | yes |
 | project\_prefix | Name prefix to use for projects created. | `string` | `"prj"` | no |
 | project\_suffix | The name of the GCP project. Max 16 characters with 3 character business unit code. | `string` | n/a | yes |
 | sa\_roles | A list of roles to give the Service Account for the project (defaults to none) | `list(string)` | `[]` | no |
 | secondary\_contact | The secondary email contact for the project | `string` | `""` | no |
+| shared\_vpc\_host\_project\_id | Shared VPC host project ID | `string` | `""` | no |
+| shared\_vpc\_subnets | List of the shared vpc subnets self links. | `list(string)` | `[]` | no |
 | vpc\_service\_control\_attach\_enabled | Whether the project will be attached to a VPC Service Control Perimeter | `bool` | `false` | no |
 | vpc\_service\_control\_perimeter\_name | The name of a VPC Service Control Perimeter to add the created project to | `string` | `null` | no |
 | vpc\_type | The type of VPC to attach the project to. Possible options are base or restricted. | `string` | `""` | no |

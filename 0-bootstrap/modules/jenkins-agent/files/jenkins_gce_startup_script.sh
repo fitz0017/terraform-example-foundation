@@ -18,7 +18,7 @@
 echo "**** Startup Step 1/9: Update apt-get repositories. ****"
 apt-get update
 
-echo "**** Startup Step 2/9: Install Java. Needed to accept jobs from Jenkins Master. ****"
+echo "**** Startup Step 2/9: Install Java. Needed to accept jobs from Jenkins Controller. ****"
 apt-get install -y default-jdk
 
 echo "**** Startup Step 3/9: Install tools needed to run pipeline commands. ****"
@@ -41,13 +41,12 @@ wget "https://releases.hashicorp.com/terraform/${tpl_TERRAFORM_VERSION}/terrafor
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-echo "**** Startup Step 6/9: Download and install the Terraform validator ****"
-gsutil cp gs://terraform-validator/releases/2021-03-22/terraform-validator-linux-amd64 .
-chmod 755 "${tpl_TERRAFORM_DIR}terraform-validator-linux-amd64"
-mv "${tpl_TERRAFORM_DIR}terraform-validator-linux-amd64" "${tpl_TERRAFORM_DIR}terraform-validator"
+echo "**** Startup Step 6/9: Download and install the Terraform tools. ****"
+gcloud components update
+gcloud components install terraform-tools
 
-echo "**** Startup Step 7/9: Set the Linux PATH to point to the Terraform directory. ****"
-export PATH=$PATH:${tpl_TERRAFORM_DIR}
+echo "**** Startup Step 7/9: Verify that the tool is installed.  ****"
+gcloud beta terraform vet --help
 
 echo "**** Startup Step 8/9: Create jenkins user. ****"
 # Home directory for the jenkins user
@@ -71,7 +70,7 @@ sed -i $SSHD_CONFIG_DIR/sshd_config \
         -e 's/#PubkeyAuthentication.*/PubkeyAuthentication yes/' \
         -e 's/#AuthorizedKeysFile.*/AuthorizedKeysFile    \/etc\/ssh\/authorized_keys/'
 
-# The Jenkins Agent needs the Master public key. This can be in your github repo
+# The Jenkins Agent needs the Controller public key. This can be in your github repo
 # shellcheck disable=SC2154
 cat > $SSHD_CONFIG_DIR/authorized_keys <<-EOT
 ${tpl_SSH_PUB_KEY}

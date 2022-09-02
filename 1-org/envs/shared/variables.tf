@@ -14,24 +14,10 @@
  * limitations under the License.
  */
 
-variable "org_id" {
-  description = "The organization id for the associated services"
+variable "networks_step_terraform_service_account_email" {
+  description = "Service account email of the account to impersonate to run Terraform in the network step."
   type        = string
-}
-
-variable "billing_account" {
-  description = "The ID of the billing account to associate this project with"
-  type        = string
-}
-
-variable "terraform_service_account" {
-  description = "Service account email of the account to impersonate to run Terraform."
-  type        = string
-}
-
-variable "default_region" {
-  description = "Default region for BigQuery resources."
-  type        = string
+  default     = ""
 }
 
 variable "enable_hub_and_spoke" {
@@ -78,28 +64,22 @@ variable "skip_gcloud_download" {
   default     = true
 }
 
-variable "scc_notification_filter" {
-  description = "Filter used to create the Security Command Center Notification, you can see more details on how to create filters in https://cloud.google.com/security-command-center/docs/how-to-api-filter-notifications#create-filter"
-  type        = string
-  default     = "state=\\\"ACTIVE\\\""
-}
-
-variable "parent_folder" {
-  description = "Optional - for an organization with existing projects or for development/validation. It will place all the example foundation resources under the provided folder instead of the root organization. The value is the numeric folder ID. The folder must already exist. Must be the same value used in previous step."
-  type        = string
-  default     = ""
-}
-
 variable "create_access_context_manager_access_policy" {
   description = "Whether to create access context manager access policy"
   type        = bool
   default     = true
 }
 
+variable "scc_notification_filter" {
+  description = "Filter used to create the Security Command Center Notification, you can see more details on how to create filters in https://cloud.google.com/security-command-center/docs/how-to-api-filter-notifications#create-filter"
+  type        = string
+  default     = "state = \"ACTIVE\""
+}
+
 variable "data_access_logs_enabled" {
-  description = "Enable Data Access logs of types DATA_READ, DATA_WRITE and ADMIN_READ for all GCP services. Enabling Data Access logs might result in your organization being charged for the additional logs usage. See https://cloud.google.com/logging/docs/audit#data-access"
+  description = "Enable Data Access logs of types DATA_READ, DATA_WRITE for all GCP services. Enabling Data Access logs might result in your organization being charged for the additional logs usage. See https://cloud.google.com/logging/docs/audit#data-access The ADMIN_READ logs are enabled by default."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "log_export_storage_location" {
@@ -225,7 +205,6 @@ variable "org_secrets_project_budget_amount" {
   default     = 1000
 }
 
-
 variable "org_billing_logs_project_alert_spent_percents" {
   description = "A list of percentages of the budget to alert on when threshold is exceeded for the org billing logs project."
   type        = list(number)
@@ -280,14 +259,61 @@ variable "scc_notifications_project_budget_amount" {
   default     = 1000
 }
 
-variable "project_prefix" {
-  description = "Name prefix to use for projects created. Should be the same in all steps. Max size is 3 characters."
+variable "gcp_platform_viewer" {
+  description = "G Suite or Cloud Identity group that have the ability to view resource information across the Google Cloud organization."
   type        = string
-  default     = "prj"
+  default     = null
 }
 
-variable "folder_prefix" {
-  description = "Name prefix to use for folders created. Should be the same in all steps."
+variable "gcp_security_reviewer" {
+  description = "G Suite or Cloud Identity group that members are part of the security team responsible for reviewing cloud security."
   type        = string
-  default     = "fldr"
+  default     = null
+}
+
+variable "gcp_network_viewer" {
+  description = "G Suite or Cloud Identity group that members are part of the networking team and review network configurations"
+  type        = string
+  default     = null
+}
+
+variable "gcp_scc_admin" {
+  description = "G Suite or Cloud Identity group that can administer Security Command Center."
+  type        = string
+  default     = null
+}
+
+variable "gcp_audit_viewer" {
+  description = "Members are part of an audit team and view audit logs in the logging project."
+  type        = string
+  default     = null
+}
+
+variable "gcp_global_secrets_admin" {
+  description = "G Suite or Cloud Identity group that members are responsible for putting secrets into Secrets Manager."
+  type        = string
+  default     = null
+}
+
+variable "gcp_org_admin_user" {
+  description = "Identity that has organization administrator permissions."
+  type        = string
+  default     = null
+}
+
+variable "gcp_billing_creator_user" {
+  description = "Identity that can create billing accounts."
+  type        = string
+  default     = null
+}
+
+variable "gcp_billing_admin_user" {
+  description = "Identity that has billing administrator permissions"
+  type        = string
+  default     = null
+}
+
+variable "backend_bucket" {
+  description = "Backend bucket to load remote state information from previous steps."
+  type        = string
 }

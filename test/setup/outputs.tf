@@ -18,7 +18,6 @@ output "project_id" {
   value = module.project.project_id
 }
 
-
 output "parent_folder" {
   description = "Parent folder id"
   value       = split("/", google_folder.test_folder.id)[1]
@@ -49,10 +48,50 @@ output "group_email" {
   value = var.group_email
 }
 
+output "group_org_admins" {
+  value = var.group_email
+}
+
+output "group_billing_admins" {
+  value = var.group_email
+}
+
+output "audit_data_users" {
+  value = var.group_email
+}
+
+output "billing_data_users" {
+  value = var.group_email
+}
+
+output "monitoring_workspace_users" {
+  value = var.group_email
+}
+
+output "project_prefix" {
+  value = local.project_prefix
+}
+
+output "domains_to_allow" {
+  value = tolist([var.domain_to_allow])
+}
+
+output "target_name_server_addresses" {
+  value = ["192.168.0.1", "192.168.0.2"]
+}
+
+output "scc_notification_name" {
+  value = "test-scc-notif-${random_string.suffix.result}"
+}
+
 output "enable_hub_and_spoke" {
   value = var.example_foundations_mode == "HubAndSpoke" ? "true" : "false"
 }
 
 output "enable_hub_and_spoke_transitivity" {
   value = var.example_foundations_mode == "HubAndSpoke" ? "true" : "false"
+}
+
+output "create_access_context_manager_access_policy" {
+  value = false
 }
